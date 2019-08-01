@@ -29,6 +29,7 @@
 	},
 	"homepage": "https://github.com/senti-iot/senti-logger#readme",
 	"dependencies": {
+		"app-root-path": "^2.2.1",
 		"apisauce": "^1.0.2",
 		"cors": "^2.8.5",
 		"dotenv": "^8.0.0",
@@ -39,6 +40,7 @@
 		"moment": "^2.22.2",
 		"mqtt": "^2.18.8",
 		"pino": "^5.12.2",
-		"senti-apicore": "0.0.17"
+		"senti-apicore": "0.0.17",
+		"winston": "^3.2.1"
 	}
 }
