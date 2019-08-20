@@ -1,0 +1,13 @@
+# Node Port to start on (same as on Server)
+NODE_PORT=3019
+
+# Rename the file to .env or .env.local (Be careful, Windows is mad when it comes to "nameless" files)
+# It will not be uploaded to GitHub as both .env and .env.local are under .gitignore
+# You can access .env variables with process.env.*VARIABLE*, example database name can be accessed with process.env.DATABASE
+# After you've renamed the file you have to restart de service
+
+# DB
+DB_USER=*your user here*
+PASSWORD=*your password here*
+DB_HOST=localhost
+DATABASE=*db name here*
