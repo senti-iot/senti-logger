@@ -25,7 +25,8 @@ const insertErrorQuery = `INSERT INTO logs
 						SET
 							message = ?,
 							level= "error",
-							timestamp=NOW()
+							timestamp=NOW(),
+							origin=?
 						`
 const getErrorsQuery = `SELECT * from logs
 						WHERE timestamp >= ? and timestamp <= ? AND level = "error"`
@@ -34,7 +35,8 @@ const insertInfoQuery = `INSERT INTO logs
 						SET
 						message=?,
 						level="info",
-						timestamp=NOW()
+						timestamp=NOW(),
+						origin=?
 						`
 
 const getInfosQuery = `SELECT * from logs
@@ -46,12 +48,12 @@ const getInfosQuery = `SELECT * from logs
 
 router.post("/log-error", async (req, res) => {
 	let message = JSON.stringify(req.body.message);
-
+	let origin = req.body.origin
 	// await db.execute("insert into logs SET message = ?, level = 'error'", [
 	// 		JSON.stringify(message)
 	// ]);
 
-	await mysqlConn.query(insertErrorQuery, [message]).then(rs => {
+	await mysqlConn.query(insertErrorQuery, [message, origin]).then(rs => {
 		if (rs[0].insertId > 0) {
 			res.status(200).json()
 		}
@@ -68,10 +70,12 @@ router.post("/log-error", async (req, res) => {
 
 router.post("/log-info", async (req, res) => {
 	let message = JSON.stringify(req.body.message);
+	let origin = req.body.origin
+
 	// await db.execute("insert into logs SET message = ?, level = 'info'", [
 	// 	JSON.stringify(message)
 	// ]);
-	await mysqlConn.query(insertInfoQuery, [message]).then(rs => {
+	await mysqlConn.query(insertInfoQuery, [message, origin]).then(rs => {
 		if (rs[0].insertId > 0) {
 			res.status(200).json()
 		}
