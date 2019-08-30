@@ -97,7 +97,7 @@ router.get("/log-info/:from/:to", async (req, res) => {
 router.get("/logs/:from/:to", async (req, res) => {
   const startDate = moment(req.params.from).format(mysqlFormat);
   const endDate = moment(req.params.to).format(mysqlFormat);
-  console.log(getAllQuery, startDate, endDate);
+  
   await mysqlConn
     .query(getAllQuery, [startDate, endDate])
     .then(rs => {
