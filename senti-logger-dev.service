@@ -8,7 +8,7 @@ Documentation=https://github.com/senti-iot/senti-logger/blob/master/README.md
 WorkingDirectory=/srv/nodejs/senti/services/logger/development
 ExecStart=/usr/bin/node server.js
 Environment=NODE_PORT=3020
-Environment=NODE_ENV=development
+Environment=NODE_ENV=dev
 Type=simple
 Restart=always
 # RestartSec=1
