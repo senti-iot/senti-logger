@@ -18,7 +18,7 @@ const app = express()
 /**
  * Service Port
  */
-const port = process.env.NODE_PORT || 3019
+const port = process.env.NODE_PORT || 3020
 
 /**
  * Service Configuration
