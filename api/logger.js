@@ -9,7 +9,10 @@ const mysqlFormat = "YYYY-MM-DD HH:mm:ss";
  * Logger
  */
 const logger = require("../currentImplementation/winstonLogger");
-
+/**
+ * UUID
+ */
+const uuidGen = require('uuid/v4')
 /**
  * MySQL connection
  */
@@ -18,105 +21,63 @@ const mysqlConn = require("../api/mysqlConn");
 /**
  * MySQL Queries
  */
-const insertErrorQuery = `INSERT INTO logs
-						SET
-							message = ?,
-							level= "error",
-							timestamp=NOW(),
-							origin=?
-						`;
-const getErrorsQuery = `SELECT * from logs
-						WHERE timestamp >= ? and timestamp <= ? AND level = "error"`;
-
-const insertInfoQuery = `INSERT INTO logs
-						SET
-						message=?,
-						level="info",
-						timestamp=NOW(),
-						origin=?
-						`;
-
-const getInfosQuery = `SELECT * from logs
-					  WHERE timestamp >= ? and timestamp <= ? AND level = "info"`;
 
 const getAllQuery = `SELECT * from logs WHERE timestamp >= ? and timestamp <= ?`;
+
+const getAllTypeQuery = `SELECT * from logs WHERE timestamp >= ? and timestamp <= ? and level = ?`
+
+const insertLog = `INSERT INTO logs
+						SET
+						message=?,
+						level=?,
+						timestamp=NOW(),
+						origin=?,
+						uuid=?
+						`;
 /**
  * Router Endpoints
  */
+router.post("/log", async (req, res) => {
+	let message = JSON.stringify(req.body.message)
+	let origin = req.body.origin
+	let uuid = uuidGen().replace(/-/g, '')
+	let type = req.body.type
+	await mysqlConn.query(insertLog, [message, type, origin, uuid]).then(rs => {
+		if (rs[0].insertId > 0) {
+			res.status(200).json(uuid)
+		}
+		else {
+			res.status(500).json();
+			logger.error(`Logger failed to store message ${message} of type ${type} with uuid ${uuid}`)
+		}
+	})
+	logger.info(message)
+})
 
-router.post("/log-error", async (req, res) => {
-  let message = JSON.stringify(req.body.message);
-  let origin = req.body.origin;
 
-  await mysqlConn.query(insertErrorQuery, [message, origin]).then(rs => {
-    if (rs[0].insertId > 0) {
-      res.status(200).json();
-    } else {
-      res.status(500).json();
-      logger.error("Logger failed to store message in DB");
-    }
-  });
+router.get("/logs/:type/:from/:to", async (req, res) => {
+	const startDate = moment(req.params.from).format(mysqlFormat);
+	const endDate = moment(req.params.to).format(mysqlFormat);
+	const type = req.params.type
+	if (type === 'all') {
+		await mysqlConn
+			.query(getAllQuery, [startDate, endDate])
+			.then(rs => {
+				res.status(200).json(rs[0]);
+			})
+			.catch(err => console.log(err));
+	}
+	if (type !== 'all') {
+		await mysqlConn
+			.query(getAllTypeQuery, [startDate, endDate, type])
+			.then(rs => {
+				res.status(200).json(rs[0]);
+			})
+			.catch(err => console.log(err)); I
+	}
 
-  logger.error(message);
 });
 
-router.post("/log-info", async (req, res) => {
-  let message = JSON.stringify(req.body.message);
-  let origin = req.body.origin;
-
-  await mysqlConn
-    .query(insertInfoQuery, [message, origin])
-    .then(rs => {
-      if (rs[0].insertId > 0) {
-        res.status(200).json();
-      } else {
-        res.status(500).json();
-        logger.error("Logger failed to store message in DB");
-      }
-    })
-    .catch(err => {
-      console.log(err);
-      logger.error("Logger failed to store message in DB");
-    });
-
-  logger.info(message);
-});
-
-router.get("/log-info/:from/:to", async (req, res) => {
-  const startDate = moment(req.params.from).format(mysqlFormat);
-  const endDate = moment(req.params.to).format(mysqlFormat);
-
-  await mysqlConn
-    .query(getInfosQuery, [startDate, endDate])
-    .then(rs => {
-      res.status(200).json(rs[0]);
-    })
-    .catch(err => console.log(err));
-});
-
-router.get("/logs/:from/:to", async (req, res) => {
-  const startDate = moment(req.params.from).format(mysqlFormat);
-  const endDate = moment(req.params.to).format(mysqlFormat);
-  
-  await mysqlConn
-    .query(getAllQuery, [startDate, endDate])
-    .then(rs => {
-      res.status(200).json(rs[0]);
-    })
-    .catch(err => console.log(err));
-});
-
-router.get("/log-error/:from/:to", async (req, res) => {
-  const startDate = moment(req.params.from).format(mysqlFormat);
-  const endDate = moment(req.params.to).format(mysqlFormat);
-
-  await mysqlConn
-    .query(getErrorsQuery, [startDate, endDate])
-    .then(rs => {
-      res.status(200).json(rs[0]);
-    })
-    .catch(err => console.log(err));
-});
 
 /**
  * Export the configured router
